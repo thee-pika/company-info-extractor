@@ -15,9 +15,8 @@ const API_KEY = process.env.API_KEY;
 
 const scrapeCompanyDetailsByQuery = async (req, res) => {
   try {
-    console.log("req.body", req.body);
     const { query, format = "json" } = req.body;
-    console.log("formAt received", format);
+
     if (!query)
       return res.status(500).json({ error: "Failed to scrape data." });
 
@@ -32,9 +31,8 @@ const scrapeCompanyDetailsByQuery = async (req, res) => {
     const data = response.data;
 
     const companies = extractAnswerBoxCompanies(data);
-    console.log("companies", companies);
+
     for (const company of companies) {
-      console.log(`🔍 Getting social profiles for ${company.company_name}`);
       const socials = await getSocialProfiles(company.company_name);
       company.socials = socials;
     }
@@ -47,8 +45,6 @@ const scrapeCompanyDetailsByQuery = async (req, res) => {
     }
 
     const sources = extractOrganicSources(data);
-
-    console.log("sources", sources);
 
     if (format === "csv") {
       const result = {

@@ -3,27 +3,13 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import axios from "axios";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-interface Company {
-  companyName: string;
-  description: string;
-  socialLinks: {
-    linkedin?: string;
-    instagram?: string;
-    twitter?: string;
-    facebook?: string;
-  };
-}
 
 export default function HomePage() {
   const [input, setInput] = useState("");
@@ -42,10 +28,10 @@ export default function HomePage() {
       let res;
       if (isUrl) {
         const body = { url: input, format };
-        res = await scrapeDataFromUrl(body);
+        res = await scrapeData("url", body);
       } else {
         const body = { query: input, format };
-        res = await scrapeDataFromQuery(body);
+        res = await scrapeData("query", body);
       }
 
       if (res?.data?.buffer?.data) {
@@ -56,7 +42,7 @@ export default function HomePage() {
           type: type === "json" ? "application/json" : "text/csv",
         });
         const url = URL.createObjectURL(blob);
-        console.log("url", url);
+
         setDownloadUrl(url);
       }
     } catch (error) {
@@ -66,23 +52,14 @@ export default function HomePage() {
     }
   };
 
-  const scrapeDataFromQuery = async (body: {
-    query: string;
-    format: string;
-  }) => {
+  const scrapeData = async (
+    endpoint: "query" | "url",
+    body: { query?: string; url?: string; format: string }
+  ) => {
     const res = await axios.post(
-      `${process.env.NEXT_PUBLIC_BACKEND_URI}/api/v1/scrape/query`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URI}/api/v1/scrape/${endpoint}`,
       body
     );
-    return res;
-  };
-
-  const scrapeDataFromUrl = async (body: { url: string; format: string }) => {
-    const res = await axios.post(
-      `${process.env.NEXT_PUBLIC_BACKEND_URI}/api/v1/scrape/url`,
-      body
-    );
-
     return res;
   };
 
